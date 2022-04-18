@@ -50,26 +50,26 @@ class StraightInstExactForm<bits<64> opA, dag outs, dag ins, string asmstr, list
   let Pattern = pattern;
 }
 
-class StraightInstImm51Form<bits<7> opA, bits<3> opB, bits<2> opC, dag outs, dag ins, string asmstr, string argstr>
+class StraightInstImm52Form<bits<7> opA, bits<3> opB, bits<2> opC, dag outs, dag ins, string asmstr, string argstr>
   : StraightInst<outs, ins, asmstr, Imm20Form> {
-  bits<51> Imm51;
+  bits<52> Imm52;
 
   let Inst{6-0} = opA;
   let Inst{9-7} = opB;
   let Inst{11-10} = opC;
-  let Inst{63-12} = Imm51;
+  let Inst{63-12} = Imm52;
 }
 
 class StraightInstOtherIntForm<bits<7> opA, bits<3> opB, bits<3> opC, dag outs, dag ins, string asmstr, string argstr>
   : StraightInst<outs, ins, asmstr, OtherIntForm> {
-  bits<27> Imm27;
-  bits<22>  ImmOrReg22;
+  bits<28> Imm28;
+  bits<23>  ImmOrReg23;
 
   let Inst{6-0} = opA;
   let Inst{9-7} = opB;
   let Inst{12-10} = opC;
-  let Inst{40-13} = Imm27;
-  let Inst{63-41} = ImmOrReg22;
+  let Inst{40-13} = Imm28;
+  let Inst{63-41} = ImmOrReg23;
 }
 
 class StraightInstFenceForm<bits<7> opA, bits<3> opB, bits<3> opC, dag outs, dag ins, string asmstr, string argstr>
@@ -87,48 +87,48 @@ class StraightInstFenceForm<bits<7> opA, bits<3> opB, bits<3> opC, dag outs, dag
 
 class StraightInstRegImmForm<bits<7> opA, bit opW, bits<3> opX, bits<2> opY, dag outs, dag ins, string asmstr, string argstr>
   : StraightInst<outs, ins, asmstr, RegImmForm> {
-  bits<27> Imm12;
-  bits<22> Reg22;
+  bits<28> Imm28;
+  bits<23> Reg23;
 
   let Inst{6-0} = opA;
   let Inst{7} = opW;
   let Inst{10-8} = opX;
   let Inst{12-11} = opY;
-  let Inst{40-13} = Imm27;
-  let Inst{63-41} = Reg22;
+  let Inst{40-13} = Imm28;
+  let Inst{63-41} = Reg23;
 }
 
 class StraightInstRegRegForm<bits<7> opA, bit opW, bits<3> opX, bits<2> opY, bits<5> opZ, dag outs, dag ins, string asmstr, string argstr>
   : StraightInst<outs, ins, asmstr, RegRegForm> {
-  bits<22> Reg22B;
-  bits<22> Reg22A;
+  bits<23> Reg23B;
+  bits<23> Reg23A;
 
   let Inst{6-0} = opA;
   let Inst{7} = opW;
   let Inst{10-8} = opX;
   let Inst{12-11} = opY;
   let Inst{17-13} = opZ;
-  let Inst{40-18} = Reg22B;
-  let Inst{63-41} = Reg22A;
+  let Inst{40-18} = Reg23B;
+  let Inst{63-41} = Reg23A;
 }
 
 class StraightInstRegRegImmForm<bits<6> opA, dag outs, dag ins, string asmstr, string argstr>
   : StraightInst<outs, ins, asmstr, RegRegImmForm> {
   bits<12> Imm12;
-  bits<22> Reg22B;
-  bits<22> Reg22A;
+  bits<23> Reg23B;
+  bits<23> Reg23A;
 
   let Inst{5-0} = opA;
   let Inst{17-6} = Imm12;
-  let Inst{40-18} = Reg7B;
-  let Inst{63-41} = Reg7A;
+  let Inst{40-18} = Reg23B;
+  let Inst{63-41} = Reg23A;
 }
 
 
 class StraightInstAtomicForm<bits<7> opA, bit opW, bits<3> opX, bits<2> opY, bits<3> opZ, bit rl, bit aq, dag outs, dag ins, string asmstr, string argstr>
   : StraightInst<outs, ins, asmstr, AtomicForm> {
-  bits<22> Reg22B;
-  bits<22> Reg22A;
+  bits<23> Reg23B;
+  bits<23> Reg23A;
 
   let Inst{6-0} = opA;
   let Inst{7} = opW;
@@ -137,8 +137,8 @@ class StraightInstAtomicForm<bits<7> opA, bit opW, bits<3> opX, bits<2> opY, bit
   let Inst{15-13} = opZ;
   let Inst{16} = rl;
   let Inst{17} = aq;
-  let Inst{40-18} = Reg22B;
-  let Inst{63-41} = Reg22A;
+  let Inst{40-18} = Reg23B;
+  let Inst{63-41} = Reg23A;
 }
 
 //FIXME: not sure how to divide up 3 registers
@@ -158,22 +158,22 @@ class StraightInstAtomicForm<bits<7> opA, bit opW, bits<3> opX, bits<2> opY, bit
 
 class StraightInstFloatForm<bits<7> opA, bit opW, bits<3> opX, bits<2> opY, bits<5> opZ, dag outs, dag ins, string asmstr, string argstr>
   : StraightInst<outs, ins, asmstr, FloatForm> {
-  bits<22> Reg22B;
-  bits<22> Reg22A;
+  bits<23> Reg23B;
+  bits<23> Reg23A;
 
   let Inst{6-0} = opA;
   let Inst{7} = opW;
   let Inst{10-8} = opX;
   let Inst{12-11} = opY;
   let Inst{17-13} = opZ;
-  let Inst{40-18} = Reg7B;
-  let Inst{63-41} = Reg7A;
+  let Inst{40-18} = Reg23B;
+  let Inst{63-41} = Reg23A;
 }
 
 class StraightInstRegShamt5Form<bits<7> opA, bit opW, bits<3> opX, bits<2> opY, bits<5> opZ, dag outs, dag ins, string asmstr, string argstr>
   : StraightInst<outs, ins, asmstr, RegShamt5Form> {
   bits<5> Shamt5;
-  bits<38> Reg38;
+  bits<39> Reg39;
 
   let Inst{6-0} = opA;
   let Inst{7} = opW;
@@ -182,13 +182,13 @@ class StraightInstRegShamt5Form<bits<7> opA, bit opW, bits<3> opX, bits<2> opY, 
   let Inst{17-13} = opZ;
   let Inst{22-18} = Shamt5;
   let Inst{24-23} = 0;
-  let Inst{63-25} = Reg38;
+  let Inst{63-25} = Reg39;
 }
 
 class StraightInstRegShamt6Form<bits<7> opA, bit opW, bits<3> opX, bits<2> opY, bits<5> opZ, dag outs, dag ins, string asmstr, string argstr>
   : StraightInst<outs, ins, asmstr, RegShamt6Form> {
   bits<6> Shamt6;
-  bits<38> Reg38;
+  bits<39> Reg39;
 
   let Inst{6-0} = opA;
   let Inst{7} = opW;
@@ -197,5 +197,5 @@ class StraightInstRegShamt6Form<bits<7> opA, bit opW, bits<3> opX, bits<2> opY, 
   let Inst{17-13} = opZ;
   let Inst{23-18} = Shamt6;
   let Inst{24} = 0;
-  let Inst{63-25} = Reg38;
+  let Inst{63-25} = Reg39;
 }
