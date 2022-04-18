@@ -7,13 +7,13 @@ import (
 
 // Instruction interface
 type instruction interface {
-	toUInt32() uint32
+	toUInt64() uint64
 }
 
-func instToBytes(inst instruction) [4]byte {
-	word := inst.toUInt32()
-	bs := [4]byte{}
-	for i := 0; i < 4; i++ {
+func instToBytes(inst instruction) [8]byte {
+	word := inst.toUInt64()
+	bs := [8]byte{}
+	for i := 0; i < 8; i++ {
 		bs[i] = byte((word >> uint(8*i)) & 0xff)
 	}
 	return bs

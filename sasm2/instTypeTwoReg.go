@@ -49,7 +49,7 @@ const (
 
 type instTypeTwoReg struct {
 	operation twoRegOperation // 18 bit
-	srcRegs   [2]uint32       // 7 bit x 2
+	srcRegs   [2]uint64       // 23 bit x 2
 }
 
 var strToTwoRegOperation = map[string]twoRegOperation{
@@ -91,8 +91,8 @@ var strToTwoRegOperation = map[string]twoRegOperation{
 	"REMu.64":   opREMu64,
 }
 
-func (i *instTypeTwoReg) toUInt32() uint32 {
-	return uint32(i.operation) | i.srcRegs[0]<<25 | i.srcRegs[1]<<18
+func (i *instTypeTwoReg) toUInt64() uint64 {
+	return uint64(i.operation) | i.srcRegs[0]<<41 | i.srcRegs[1]<<18
 }
 
 func fromStringToInstTypeTwoReg(str string) (*instTypeTwoReg, error) {
@@ -110,11 +110,11 @@ func fromStringToInstTypeTwoReg(str string) (*instTypeTwoReg, error) {
 	i.operation = op
 
 	for j := 0; j < 2; j++ {
-		srcReg, err := strconv.ParseUint(ss[j+1], 10, 7) // srcReg1 or zImm
+		srcReg, err := strconv.ParseUint(ss[j+1], 10, 23) // srcReg1 or zImm
 		if err != nil {
 			return nil, err
 		}
-		i.srcRegs[j] = uint32(srcReg)
+		i.srcRegs[j] = uint64(srcReg)
 	}
 
 	return &i, nil
