@@ -1,0 +1,9 @@
+Function_putchar :
+ SPST.64 1 -8
+ LUi 460631
+ RMOV 4
+ ADDi.64 2 1123
+ ECALL
+ SPLD.64 -8
+ RMOV 2
+ JR 2 0

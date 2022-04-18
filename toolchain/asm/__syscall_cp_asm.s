@@ -1,0 +1,37 @@
+Function___syscall_cp_asm :
+ [ z    ] IMPLICIT_ARG_VALUE
+ [ y    ] IMPLICIT_ARG_VALUE
+ [ x    ] IMPLICIT_ARG_VALUE
+ [ w    ] IMPLICIT_ARG_VALUE
+ [ v    ] IMPLICIT_ARG_VALUE
+ [ u    ] IMPLICIT_ARG_VALUE
+ [ nr   ] IMPLICIT_ARG_VALUE
+ [cancel] IMPLICIT_ARG_VALUE
+ [RETADR] IMPLICIT_RET_ADDR
+ SPADDi -8
+ SPST.64 2 0
+ LD.64 4 0
+ BNE 0 1 24
+ RMOV 13
+ RMOV 13
+ RMOV 13
+ RMOV 13
+ RMOV 13
+ RMOV 13
+ RMOV 13
+ ECALL
+ SPADDi 8
+ SPLD.64 -8
+ RMOV 3
+ JR 2 0
+ RMOV 13
+ RMOV 13
+ RMOV 13
+ RMOV 13
+ RMOV 13
+ RMOV 13
+ JAL               Function___cancel
+ SPADDi 8
+ SPLD.64 -8
+ RMOV 3
+ JR 2 0
