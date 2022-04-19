@@ -5,8 +5,8 @@ import (
 )
 
 func main() {
-	var fileName = flag.String("file", "", "アセンブリファイルを指定する")
-	var outputFileName = flag.String("output", "", "出力ファイルを指定する")
+	var fileName = flag.String("file", "", "")
+	var outputFileName = flag.String("output", "", "")
 
 	flag.Parse()
 

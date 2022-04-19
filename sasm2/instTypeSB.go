@@ -23,8 +23,8 @@ const (
 
 type instTypeSB struct {
 	operation sbOperation
-	imm12     uint32
-	srcRegs   [2]uint32
+	imm12     uint64
+	srcRegs   [2]uint64
 }
 
 var strToSBOperation = map[string]sbOperation{
@@ -40,8 +40,8 @@ var strToSBOperation = map[string]sbOperation{
 	"BNE":   opBNE,
 }
 
-func (i *instTypeSB) toUInt32() uint32 {
-	return uint32(i.operation) | (i.imm12 << 6) | (i.srcRegs[1] << 18) | (i.srcRegs[0] << 25)
+func (i *instTypeSB) toUInt64() uint64 {
+	return uint64(i.operation) | (i.imm12 << 6) | (i.srcRegs[1] << 18) | (i.srcRegs[0] << 41)
 }
 
 func fromStringToInstTypeSB(str string) (*instTypeSB, error) {
@@ -60,18 +60,18 @@ func fromStringToInstTypeSB(str string) (*instTypeSB, error) {
 	}
 
 	for j := 0; j < 2; j++ {
-		t, err := strconv.ParseUint(ss[j+1], 10, 8)
+		t, err := strconv.ParseUint(ss[j+1], 10, 23)
 		if err != nil {
 			return nil, fmt.Errorf("failed to ParseUint '%s' in %s: %s", ss[j+1], str, err)
 		}
-		i.srcRegs[j] = uint32(t)
+		i.srcRegs[j] = uint64(t)
 	}
 
 	t, err := strconv.ParseInt(ss[3], 10, 12)
 	if err != nil {
 		return nil, fmt.Errorf("failed to ParseUint '%s' in %s: %s", ss[3], str, err)
 	}
-	i.imm12 = uint32(t) & 0xfff
+	i.imm12 = uint64(t) & 0xfff
 
 	return &i, nil
 }

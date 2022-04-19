@@ -19,7 +19,7 @@ const (
 
 type instTypeNoReg struct {
 	operation noRegOperation
-	imm20     uint32
+	imm52     uint64
 }
 
 var strToNoRegOperation = map[string]noRegOperation{
@@ -31,8 +31,8 @@ var strToNoRegOperation = map[string]noRegOperation{
 	"AUiSP":  opAUiSP,
 }
 
-func (i *instTypeNoReg) toUInt32() uint32 {
-	return uint32(i.operation) | (i.imm20 << 12)
+func (i *instTypeNoReg) toUInt64() uint64 {
+	return uint64(i.operation) | (i.imm52 << 12)
 }
 
 func fromStringToInstTypeNoReg(str string) (*instTypeNoReg, error) {
@@ -46,11 +46,11 @@ func fromStringToInstTypeNoReg(str string) (*instTypeNoReg, error) {
 	}
 	i.operation = op
 
-	t, err := strconv.ParseInt(ss[1], 10, 20)
+	t, err := strconv.ParseInt(ss[1], 10, 52)
 	if err != nil {
 		return nil, fmt.Errorf("failed to ParseUint '%s' in %s: %s", ss[1], str, err)
 	}
-	i.imm20 = uint32(t) & 0xfffff
+	i.imm52 = uint64(t) & 0xfffff
 
 	return &i, nil
 }

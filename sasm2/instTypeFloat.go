@@ -61,7 +61,7 @@ const (
 type instTypeFloat struct {
 	operation floatOperation // 5+2+(+3)+1+7 = 15(18) bit
 	rm        roundmode      // 3 bit
-	srcRegs   [2]uint32      // 7 bit x2
+	srcRegs   [2]uint64      // 23 bit x2
 }
 
 var strToFloatOperation = map[string]floatOperation{
@@ -128,8 +128,8 @@ var strToFloatOperation = map[string]floatOperation{
 	"FCVT.u64.to.f64": opFCVTd64u,
 }
 
-func (i *instTypeFloat) toUInt32() uint32 {
-	return uint32(i.operation) | (uint32(i.rm << 8)) | (i.srcRegs[1] << 18) | (i.srcRegs[0] << 25)
+func (i *instTypeFloat) toUInt64() uint64 {
+	return uint64(i.operation) | (uint64(i.rm << 8)) | (i.srcRegs[1] << 18) | (i.srcRegs[0] << 41)
 }
 
 // fromStringToInstTypeFloat
@@ -154,11 +154,11 @@ func fromStringToInstTypeFloat(str string) (*instTypeFloat, error) {
 			}
 
 			for j := 0; j < 2; j++ {
-				t, err := strconv.ParseUint(ss[j+1], 10, 8)
+				t, err := strconv.ParseUint(ss[j+1], 10, 23)
 				if err != nil {
 					return nil, fmt.Errorf("failed to ParseUint '%s' in %s: %s", ss[j+1], str, err)
 				}
-				i.srcRegs[j] = uint32(t)
+				i.srcRegs[j] = uint64(t)
 			}
 
 			if len(ss) >= 4 {
@@ -179,11 +179,11 @@ func fromStringToInstTypeFloat(str string) (*instTypeFloat, error) {
 				return nil, fmt.Errorf("invalid inst : few args '%s'", str)
 			}
 
-			t, err := strconv.ParseUint(ss[1], 10, 8)
+			t, err := strconv.ParseUint(ss[1], 10, 23)
 			if err != nil {
 				return nil, fmt.Errorf("failed to ParseUint '%s' in %s: %s", ss[1], str, err)
 			}
-			i.srcRegs[0] = uint32(t)
+			i.srcRegs[0] = uint64(t)
 		}
 	default:
 		panic("can't reach here... instTypeFloat.go switch")

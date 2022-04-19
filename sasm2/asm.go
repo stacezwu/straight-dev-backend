@@ -67,7 +67,7 @@ func assemble(fileName, outputFileName string) error {
 			isInst = false
 			continue
 		} else if []rune(t)[0] == '!' {
-			entryOffset = len(insts) * 8 //TODO
+			entryOffset = len(insts) * 8
 			t = t[1:]
 		}
 
@@ -81,7 +81,7 @@ func assemble(fileName, outputFileName string) error {
 			t := strings.TrimSpace(t)
 			s := strings.Split(t, " ")
 			for _, s := range s {
-				if d, err := strconv.ParseUint(s, 10, 8); err == nil { //FIXME
+				if d, err := strconv.ParseUint(s, 10, 8); err == nil {
 					datum = append(datum, byte(d))
 				} else {
 					return errors.New("invalid data\n" + err.Error())
@@ -93,8 +93,8 @@ func assemble(fileName, outputFileName string) error {
 	elf := NewELFFile()
 	prog := make([]byte, len(insts)*8)
 	for i, v := range insts {
-		t := instToBytes(v) //FIXME
-		copy(prog[4*i:4*(i+1)], t[:])
+		t := instToBytes(v)
+		copy(prog[8*i:8*(i+1)], t[:])
 	}
 	datumbytes := make([]byte, len(datum)+dataStartAddr)
 	for i, v := range datum {
@@ -106,7 +106,7 @@ func assemble(fileName, outputFileName string) error {
 		ProgFlags:    ProgFlagExecute + ProgFlagRead,
 		ProgVAddr:    ProgEntryAddr,
 		ProgPAddr:    0,
-		ProgFileSize: uint64(len(insts) * 8), // あとでlegalize
+		ProgFileSize: uint64(len(insts) * 8),
 		Prog:         prog,
 	}
 	elf.AddSegment(&progHeader)

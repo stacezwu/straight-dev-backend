@@ -68,8 +68,8 @@ const (
 
 type instTypeOneReg struct {
 	operation oneRegOperation // 13 bit
-	imm12     uint32          // 12 bit (Imm, CSR, 0 or 1)
-	srcReg    uint32          // 7 bit
+	imm12     uint64          // 28 bit (Imm, CSR, 0 or 1)
+	srcReg    uint64          // 23 bit
 }
 
 var strToOneRegOperation = map[string]oneRegOperation{
@@ -132,12 +132,12 @@ var strToOneRegOperation = map[string]oneRegOperation{
 	"SRAi.64":     opSRLi64, // imm = 0_xxxxxx_01000
 }
 
-func (i *instTypeOneReg) toUInt32() uint32 {
+func (i *instTypeOneReg) toUInt64() uint64 {
 	op := i.operation
 	if i.operation == opRMOV {
 		op = opADDi64
 	}
-	return uint32(op) | (i.imm12 << 13) | (i.srcReg << 25)
+	return uint64(op) | (i.imm28 << 13) | (i.srcReg << 41)
 }
 
 func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
@@ -153,11 +153,11 @@ func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
 	switch op {
 	case opRPINC:
 		if ss[0] == "RPINC" {
-			t, err := strconv.ParseUint(ss[1], 10, 7)
+			t, err := strconv.ParseUint(ss[1], 10, 23)
 			if err != nil {
 				return nil, fmt.Errorf("failed to parse %s (OneReg instruction '%s' opRPINC): %s", ss[1], str, err)
 			}
-			i.srcReg = uint32(t)
+			i.srcReg = uint64(t)
 		} // else -> NOP
 
 	case opFENCE: // FENCE succ(4bit) pred(4bit)
@@ -173,7 +173,7 @@ func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
 			if err != nil {
 				return nil, fmt.Errorf("failed to parse %s (OneReg instruction '%s' opFENCE): %s", ss[2], str, err)
 			}
-			i.imm12 = uint32(pred | (succ << 4))
+			i.imm28 = uint64(pred | (succ << 4))
 		}
 
 	case opFENCEI:
@@ -181,7 +181,7 @@ func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
 
 	case opECALL:
 		if ss[0] == "EBREAK" {
-			i.imm12 = 1
+			i.imm28 = 1
 		} // else -> ECALL (i.imm = 1)
 
 	case opJR, opJALR,
@@ -195,12 +195,12 @@ func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
 			if len(ss) < 3 {
 				return nil, fmt.Errorf("too few arg: %s", str)
 			}
-			srcReg1, err := strconv.ParseUint(ss[1], 10, 7) // srcReg1 or zImm
+			srcReg1, err := strconv.ParseUint(ss[1], 10, 23) // srcReg1 or zImm
 			if err != nil {
 				return nil, fmt.Errorf("failed to parse %s (OneReg instruction '%s'): %s", ss[1], str, err)
 			}
-			i.srcReg = uint32(srcReg1)
-			imm, err := strconv.ParseInt(ss[2], 10, 12) // Imm or CSR
+			i.srcReg = uint64(srcReg1)
+			imm, err := strconv.ParseInt(ss[2], 10, 28) // Imm or CSR
 			if err != nil {
 				return nil, fmt.Errorf("failed to parse %s (OneReg instruction '%s'): %s", ss[2], str, err)
 			}
@@ -213,9 +213,9 @@ func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
 				if ss[0] == "SRAi.32" || ss[0] == "SRAi.64" {
 					funct = 1 << 3
 				}
-				i.imm12 = uint32(imm&0x3f)<<5 | funct
+				i.imm28 = uint64(imm&0x3f)<<5 | funct
 			} else {
-				i.imm12 = uint32(imm) & 0xfff
+				i.imm28 = uint64(imm) & 0xfff
 			}
 		}
 
@@ -225,11 +225,11 @@ func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
 			if len(ss) < 2 {
 				return nil, fmt.Errorf("too few arg: %s", str)
 			}
-			imm, err := strconv.ParseInt(ss[1], 10, 12) // Imm
+			imm, err := strconv.ParseInt(ss[1], 10, 28) // Imm
 			if err != nil {
 				return nil, fmt.Errorf("failed to parse %s (OneReg instruction '%s' opSPLD): %s", ss[1], str, err)
 			}
-			i.imm12 = uint32(imm & (1<<12 - 1))
+			i.imm28 = uint64(imm & (1<<28 - 1))
 		}
 
 	case opRMOV:
@@ -237,11 +237,11 @@ func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
 			if len(ss) < 2 {
 				return nil, fmt.Errorf("too few arg: %s", str)
 			}
-			srcReg1, err := strconv.ParseUint(ss[1], 10, 7) // srcReg1 or zImm
+			srcReg1, err := strconv.ParseUint(ss[1], 10, 23) // srcReg1 or zImm
 			if err != nil {
 				return nil, fmt.Errorf("failed to parse %s (OneReg instruction '%s'): %s", ss[1], str, err)
 			}
-			i.srcReg = uint32(srcReg1)
+			i.srcReg = uint64(srcReg1)
 		}
 	default:
 		println("op ", op)

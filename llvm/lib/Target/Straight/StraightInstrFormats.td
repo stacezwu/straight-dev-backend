@@ -18,15 +18,10 @@ def RegImmForm     : InstructionFormat<4>; // Reg7-Imm12-funct2-funct3-Width1-Op
 def RegRegForm     : InstructionFormat<5>; // Reg7-Reg7-Ex5-funct2-funct3-Width1-Opcode7
 def RegRegImmForm  : InstructionFormat<6>; // Reg7-Reg7-Imm12-Opcode6
 def AtomicForm     : InstructionFormat<7>; // Reg7-Reg7-aq1-rl1-funct3-funct2-funct3-Width1-Opcode7
-def FMAForm        : InstructionFormat<8>; // Reg7-Reg7-Reg7-RM3-Width1-Opcode7
+//def FMAForm        : InstructionFormat<8>; // Reg7-Reg7-Reg7-RM3-Width1-Opcode7
 def FloatForm      : InstructionFormat<9>; // Reg7-Reg7-funct5-funct2-RM3-Width1-Opcode7
 def RegShamt5Form  : InstructionFormat<10>; // Reg7-2{0}-Shamt5-Ex5-funct2-funct3-{0}-Opcode7
 def RegShamt6Form  : InstructionFormat<11>; // Reg7-{0}-Shamt6-Ex5-funct2-funct3-{1}-Opcode7
-
-
-
-
-
 
 class StraightInst<dag outs, dag ins, string asmstr, InstructionFormat instformat> : Instruction {
   InstructionFormat InstFormat = instformat;
@@ -63,7 +58,7 @@ class StraightInstImm52Form<bits<7> opA, bits<3> opB, bits<2> opC, dag outs, dag
 class StraightInstOtherIntForm<bits<7> opA, bits<3> opB, bits<3> opC, dag outs, dag ins, string asmstr, string argstr>
   : StraightInst<outs, ins, asmstr, OtherIntForm> {
   bits<28> Imm28;
-  bits<23>  ImmOrReg23;
+  bits<23> ImmOrReg23;
 
   let Inst{6-0} = opA;
   let Inst{9-7} = opB;
