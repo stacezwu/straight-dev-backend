@@ -272,7 +272,7 @@ int main() {
 					const auto target = spliceTarget( 19, code );
 					const auto loadImmInstr = getLoadSomeAddressInstr( target, pc );
 					std::cout << code.substr(0, 10) << loadImmInstr << "#" << code.substr(8) << '\n';
-					pc += 4; // 2命令分のスペースをとるので追加分
+					pc += 4; 
 				} else if( matchTarget( code, 19, "BB_" ) ) {
 					const auto target = spliceTarget( 19, code );
 					std::cout << code.substr(0, 19) << relAddr( target, pc ) / 2 << '\n';
@@ -309,7 +309,6 @@ int main() {
 				output_value( val, size );
 				output_count++;
 				if (output_count > 512) {
-					//  一行に書く値が多すぎると、アセンブラが読み込めないため、一定の間隔で改行する
 					//  https://pkg.go.dev/bufio#pkg-constants
 					std::cout << "\n";
 					output_count = 0;

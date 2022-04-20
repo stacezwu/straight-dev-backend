@@ -17,10 +17,10 @@
 // Instructions
 //===----------------------------------------------------------------------===//
 
-//def FMADD_64  : FMA<0b0011011, 0b1, 0b111, DPR, "FMADD.s">;
-//def FMSUB_64  : FMA<0b1011011, 0b1, 0b111, DPR, "FMSUB.s">;
-//def FNMSUB_64 : FMA<0b0111011, 0b1, 0b111, DPR, "FNMSUB.s">;
-//def FNMADD_64 : FMA<0b1111011, 0b1, 0b111, DPR, "FNMADD.s">;
+// def FMADD_64  : FMA<0b0011011, 0b1, 0b111, DPR, "FMADD.s">;
+// def FMSUB_64  : FMA<0b1011011, 0b1, 0b111, DPR, "FMSUB.s">;
+// def FNMSUB_64 : FMA<0b0111011, 0b1, 0b111, DPR, "FNMSUB.s">;
+// def FNMADD_64 : FMA<0b1111011, 0b1, 0b111, DPR, "FNMADD.s">;
 
 def FADD_64 : FloatBinaryOp<0b1001111, 0b1, 0b111, 0b00, 0b00000, DPR, "FADD.s">;
 def FSUB_64 : FloatBinaryOp<0b1001111, 0b1, 0b111, 0b00, 0b00001, DPR, "FSUB.s">;
@@ -61,14 +61,14 @@ def FCVT_f64_to_f32 : StraightInstFloatForm<0b1001111, 0b1, 0b111, 0b00, 0b10100
 class PatDPR<SDPatternOperator OpNode, StraightInstFloatForm Inst>
 	: Pat<(OpNode DPR:$rs1, DPR:$rs2), (Inst DPR:$rs1, DPR:$rs2)>;
 
-//def : Pat<(fma       DPR:$rs1 ,       DPR:$rs2 ,       DPR:$rs3 ), (FMADD_64  DPR:$rs1, DPR:$rs2, DPR:$rs3)>;
-//def : Pat<(fma       DPR:$rs1 , (fneg DPR:$rs2),       DPR:$rs3 ), (FNMSUB_64 DPR:$rs1, DPR:$rs2, DPR:$rs3)>;
-//def : Pat<(fma (fneg DPR:$rs1),       DPR:$rs2 ,       DPR:$rs3 ), (FNMSUB_64 DPR:$rs1, DPR:$rs2, DPR:$rs3)>;
-//def : Pat<(fma (fneg DPR:$rs1), (fneg DPR:$rs2),       DPR:$rs3 ), (FMADD_64  DPR:$rs1, DPR:$rs2, DPR:$rs3)>;
-//def : Pat<(fma       DPR:$rs1 ,       DPR:$rs2 , (fneg DPR:$rs3)), (FMSUB_64  DPR:$rs1, DPR:$rs2, DPR:$rs3)>;
-//def : Pat<(fma       DPR:$rs1 , (fneg DPR:$rs2), (fneg DPR:$rs3)), (FNMADD_64 DPR:$rs1, DPR:$rs2, DPR:$rs3)>;
-//def : Pat<(fma (fneg DPR:$rs1),       DPR:$rs2 , (fneg DPR:$rs3)), (FNMADD_64 DPR:$rs1, DPR:$rs2, DPR:$rs3)>;
-//def : Pat<(fma (fneg DPR:$rs1), (fneg DPR:$rs2), (fneg DPR:$rs3)), (FMSUB_64  DPR:$rs1, DPR:$rs2, DPR:$rs3)>;
+// def : Pat<(fma       DPR:$rs1 ,       DPR:$rs2 ,       DPR:$rs3 ), (FMADD_64  DPR:$rs1, DPR:$rs2, DPR:$rs3)>;
+// def : Pat<(fma       DPR:$rs1 , (fneg DPR:$rs2),       DPR:$rs3 ), (FNMSUB_64 DPR:$rs1, DPR:$rs2, DPR:$rs3)>;
+// def : Pat<(fma (fneg DPR:$rs1),       DPR:$rs2 ,       DPR:$rs3 ), (FNMSUB_64 DPR:$rs1, DPR:$rs2, DPR:$rs3)>;
+// def : Pat<(fma (fneg DPR:$rs1), (fneg DPR:$rs2),       DPR:$rs3 ), (FMADD_64  DPR:$rs1, DPR:$rs2, DPR:$rs3)>;
+// def : Pat<(fma       DPR:$rs1 ,       DPR:$rs2 , (fneg DPR:$rs3)), (FMSUB_64  DPR:$rs1, DPR:$rs2, DPR:$rs3)>;
+// def : Pat<(fma       DPR:$rs1 , (fneg DPR:$rs2), (fneg DPR:$rs3)), (FNMADD_64 DPR:$rs1, DPR:$rs2, DPR:$rs3)>;
+// def : Pat<(fma (fneg DPR:$rs1),       DPR:$rs2 , (fneg DPR:$rs3)), (FNMADD_64 DPR:$rs1, DPR:$rs2, DPR:$rs3)>;
+// def : Pat<(fma (fneg DPR:$rs1), (fneg DPR:$rs2), (fneg DPR:$rs3)), (FMSUB_64  DPR:$rs1, DPR:$rs2, DPR:$rs3)>;
 
 def : PatDPR<fadd, FADD_64>;
 def : PatDPR<fsub, FSUB_64>;
@@ -108,3 +108,4 @@ def : Pat<(fpround DPR:$rs1), (FCVT_f64_to_f32 DPR:$rs1)>;
 
 defm : PatLoad<load, LD_f64>;
 defm : PatStore<store, ST_f64, DPR>;
+

@@ -23,8 +23,9 @@ func strToInst(s string) (instruction, error) {
 	}
 
 	if _, ok := strToMacOperation[ss[0]]; ok {
-		i, err := fromStringToInstTypeMAC(s)
-		return instruction(i), err
+		// i, err := fromStringToInstTypeMAC(s)
+		// return instruction(i), err
+		panic("MAC/FMA unimplemented")
 	}
 
 	if _, ok := strToOneRegOperation[ss[0]]; ok {

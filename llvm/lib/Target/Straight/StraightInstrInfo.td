@@ -27,7 +27,6 @@ def SDT_RISCVSelectCC     : SDTypeProfile<1, 5, [SDTCisSameAs<1, 2>,
                                                  SDTCisSameAs<4, 5>]>;
 def StraightBitCastSDT    : SDTypeProfile<1, 1, [SDTCisVT<1, f32>]>;
 
-
 def StraightCall       : SDNode<"StraightISD::CALL", StraightCallSDT, [SDNPHasChain, SDNPOutGlue, SDNPOptInGlue, SDNPVariadic]>;
 def StraightRetFlag    : SDNode<"StraightISD::RET_FLAG", SDTNone, [SDNPHasChain, SDNPOptInGlue, SDNPVariadic]>;
 def StraightGlobal     : SDNode<"StraightISD::GLOBAL", StraightGlobalAddressSDT>;
@@ -135,20 +134,20 @@ class RegSh6<bits<7> opA, bit opW, bits<3> opX, bits<2> opY, bits<5> opZ, string
 
 
 let hasSideEffects = 0, isReMaterializable = 1, mayLoad = 0, mayStore = 0 in {
-def LUi : StraightInstImm52Form<0b0001111, 0b011, 0b10, (outs GPR:$rd),
+def LUi : StraightInstImm20Form<0b0001111, 0b011, 0b10, (outs GPR:$rd),
                                 (ins simm20:$imm20),
                                 "LUi", "$rd, $imm20">;
 
-def AUiPC : StraightInstImm52Form<0b0001111, 0b011, 0b11, (outs GPR:$rd),
+def AUiPC : StraightInstImm20Form<0b0001111, 0b011, 0b11, (outs GPR:$rd),
                                   (ins simm20:$imm20),
                                   "AUiPC", "$rd, $imm20">;
 
-def AUiSP : StraightInstImm52Form<0b0001111, 0b111, 0b11, (outs GPR:$rd),
+def AUiSP : StraightInstImm20Form<0b0001111, 0b111, 0b11, (outs GPR:$rd),
                                   (ins simm20:$imm20),
                                   "AUiSP", "$rd, $imm20">;
 
 let isCall = 1, usesCustomInserter = 1 in
-def JAL : StraightInstImm52Form<0b0001111, 0b011, 0b01, (outs GPR:$rd), (ins calltarget:$fun),
+def JAL : StraightInstImm20Form<0b0001111, 0b011, 0b01, (outs GPR:$rd), (ins calltarget:$fun),
                   "JAL", "$rd, $fun">;
 
 let isCall = 1, usesCustomInserter = 1 in
@@ -158,7 +157,7 @@ def JALR : StraightInstOtherIntForm<0b0001111, 0b001, 0b001, (outs GPR:$rd),
 } // hasSideEffects = 0, mayLoad = 0, mayStore = 0
 
 let isBarrier = 1, isBranch = 1, isTerminator = 1 in
-def JMP : StraightInstImm52Form<0b0001111, 0b011, 0b00, (outs), (ins brtarget:$brtarget),
+def JMP : StraightInstImm20Form<0b0001111, 0b011, 0b00, (outs), (ins brtarget:$brtarget),
                                 "J", "$brtarget">;
 
 let isBarrier = 1, isReturn = 1, isTerminator = 1 in
@@ -386,13 +385,17 @@ def : Pat<(StraightCall (iPTR GPR:$rs1)), (JALR GPR:$rs1, 0)>;
 def : Pat<(StraightCall tglobaladdr:$func), (JAL tglobaladdr:$func)>;
 def : Pat<(StraightCall texternalsym:$func), (JAL texternalsym:$func)>;
 
+/// Predicates
+
 def IsOrAdd: PatFrag<(ops node:$A, node:$B), (or node:$A, node:$B), [{
   return isOrEquivalentToAdd(N);
 }]>;
 
+/// Address generation
 
 def : Pat<(IsOrAdd AddrFI:$rs1, GPR:$rs2), (ADDi_64 AddrFI:$rs1, GPR:$rs2)>;
 
+/// Loads
 
 multiclass PatLoad<PatFrag LoadOp, Load Inst> {
   def : Pat<(LoadOp GPR:$rs1), (Inst GPR:$rs1, 0)>;
@@ -418,6 +421,7 @@ defm : PatLoad< extloadi32, LD_32>;
 defm : PatLoad<zextloadi32, LD_32u>;
 defm : PatLoad<    load   , LD_64>;
 
+/// Stores
 
 multiclass PatStore<PatFrag StoreOp, Store Inst, RegisterClass StTy> {
   def : Pat<(StoreOp StTy:$rs2, GPR:$rs1), (Inst StTy:$rs2, GPR:$rs1, 0)>;
@@ -447,6 +451,7 @@ defm : PatStore<truncstorei16, ST_16, GPR>;
 defm : PatStore<truncstorei32, ST_32, GPR>;
 defm : PatStore<     store   , ST_64, GPR>;
 
+// pseudo instructions
 
 def RMOV        : StraightInstExactForm<0b0000000000000000000000000000000000000000000000000010000000001111, (outs GPR:$dst), (ins GPR:$src), "RMOV $dst, $src", []>;
 def BITCASTftoi : StraightInstExactForm<0b0000000000000000000000000000000000000000000000000100000000001111, (outs GPR:$dst), (ins FPR:$src), "BITCASTftoi $dst, $src", [(set GPR:$dst, (bitconvert FPR:$src))]>;
@@ -465,10 +470,11 @@ def SPST_f32 : StraightInstExactForm<0b00000000000000000000000000000000000000000
 def SPST_f64 : StraightInstExactForm<0b0000000000000000000000000000000000000000000000011010000000001111, (outs), (ins DPR:$rs2, simm12:$imm), "ST_f64 $rs2, $imm", []>;
 def LD_f64 : StraightInstExactForm<0b0000000000000000000000000000000000000000000000011100000000001111, (outs DPR:$dst), (ins GPR:$rs1, simm12:$imm), "LD_f64 $dst, $rs1, $imm", []>;
 
+// not automatically selected instructions
 
 def NOP    : StraightInstExactForm<0b0000000000000000000000000000000000000000000000000000000000001111, (outs), (ins), "NOP" , []>;
 def RPINC  : StraightInstExactForm<0b0000000000000000000000000000000000000010000000000000000000001111, (outs), (ins simm20:$imm), "RPINC $imm", []>;
-def SPADDi : StraightInstImm52Form<0b0001111, 0b111, 0b00, (outs), (ins simm20:$imm), "SPADDi", "$imm">;
+def SPADDi : StraightInstImm20Form<0b0001111, 0b111, 0b00, (outs), (ins simm20:$imm), "SPADDi", "$imm">;
 
 
 
@@ -489,6 +495,7 @@ def Select_DPR_Using_CC_GPR : SelectCC_rrirr<DPR, GPR, 0b00000000000000000000000
 def Select_DPR_Using_CC_FPR : SelectCC_rrirr<DPR, FPR, 0b0000000000000000000000000000000000000000001000011110000000001111>;
 def Select_DPR_Using_CC_DPR : SelectCC_rrirr<DPR, DPR, 0b0000000000000000000000000000000000000000001001011110000000001111>;
 
+/// ConstantFP
 
 def : Pat<(StraightConstantFP GPR:$src), (BITCASTitof $src)>;
 def : Pat<(StraightConstantFP GPR:$src), (BITCASTitod $src)>;
@@ -506,6 +513,7 @@ def : Pat<(SelectCC DPR:$lhs, (StraightConstantFP GPR:$src), (i64 imm:$imm), DPR
 def : Pat<(SelectCC (StraightConstantFP GPR:$src), FPR:$rhs, (i64 imm:$imm), DPR:$truev, DPR:$falsev), (Select_DPR_Using_CC_FPR (BITCASTitof GPR:$src), FPR:$rhs, i64imm:$imm, DPR:$truev, DPR:$falsev)>;
 def : Pat<(SelectCC (StraightConstantFP GPR:$src), DPR:$rhs, (i64 imm:$imm), DPR:$truev, DPR:$falsev), (Select_DPR_Using_CC_DPR (BITCASTitod GPR:$src), DPR:$rhs, i64imm:$imm, DPR:$truev, DPR:$falsev)>;
 
+/// BITCAST_FTOI / BITCAST_ITOF
 
 def : Pat<(StraightBitCastFtoI FPR:$src), (BITCASTftoi $src)>;
 def : Pat<(StraightBitCastItoF GPR:$src), (BITCASTitof $src)>;
@@ -513,3 +521,4 @@ def : Pat<(StraightBitCastItoF GPR:$src), (BITCASTitof $src)>;
 
 include "StraightInstrInfoF.td"
 include "StraightInstrInfoD.td"
+

@@ -68,7 +68,7 @@ const (
 
 type instTypeOneReg struct {
 	operation oneRegOperation // 13 bit
-	imm12     uint64          // 28 bit (Imm, CSR, 0 or 1)
+	imm12     uint64          // 12 bit (Imm, CSR, 0 or 1)
 	srcReg    uint64          // 23 bit
 }
 
@@ -137,7 +137,7 @@ func (i *instTypeOneReg) toUInt64() uint64 {
 	if i.operation == opRMOV {
 		op = opADDi64
 	}
-	return uint64(op) | (i.imm28 << 13) | (i.srcReg << 41)
+	return uint64(op) | (i.imm12 << 13) | (i.srcReg << 25) & uint64((1<<48)-1)
 }
 
 func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {

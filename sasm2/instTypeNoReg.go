@@ -19,7 +19,7 @@ const (
 
 type instTypeNoReg struct {
 	operation noRegOperation
-	imm52     uint64
+	imm20     uint64
 }
 
 var strToNoRegOperation = map[string]noRegOperation{
@@ -32,7 +32,7 @@ var strToNoRegOperation = map[string]noRegOperation{
 }
 
 func (i *instTypeNoReg) toUInt64() uint64 {
-	return uint64(i.operation) | (i.imm52 << 12)
+	return uint64(i.operation) | (i.imm20 << 12) & uint64((1 << 32) - 1)
 }
 
 func fromStringToInstTypeNoReg(str string) (*instTypeNoReg, error) {
@@ -50,7 +50,7 @@ func fromStringToInstTypeNoReg(str string) (*instTypeNoReg, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to ParseUint '%s' in %s: %s", ss[1], str, err)
 	}
-	i.imm52 = uint64(t) & 0xfffff
+	i.imm20 = uint64(t) & 0xfffff
 
 	return &i, nil
 }
