@@ -88,10 +88,15 @@ unsigned StraightMCCodeEmitter::getMachineOpValue(const MCInst &MI,
                                              const MCOperand &MO,
                                              SmallVectorImpl<MCFixup> &Fixups,
                                              const MCSubtargetInfo &STI) const {
-  if (MO.isReg())
-    return MRI.getEncodingValue(MO.getReg());
-  if (MO.isImm())
+  if (MO.isReg())	{
+		printf("Was register");
+		return MRI.getEncodingValue(MO.getReg());
+	}
+  if (MO.isImm())	{
+		printf("Was immediate");
     return static_cast<unsigned>(MO.getImm());
+	}
+	assert(false && "test for not expr");
 
   assert(MO.isExpr());
 
@@ -114,6 +119,13 @@ unsigned StraightMCCodeEmitter::getMachineOpValue(const MCInst &MI,
 void StraightMCCodeEmitter::encodeInstruction(const MCInst &MI, raw_ostream &OS,
                                          SmallVectorImpl<MCFixup> &Fixups,
                                          const MCSubtargetInfo &STI) const {
+  verifyInstructionPredicates(MI,
+                              computeAvailableFeatures(STI.getFeatureBits()));
+
+  support::endian::Writer OSE(OS,
+                              IsLittleEndian ? support::little : support::big);
+	uint64_t Value = getBinaryCodeForInstr(MI, Fixups, STI);
+	OSE.write<uint64_t>(Value);
 }
 
 // Encode Straight Memory Operand

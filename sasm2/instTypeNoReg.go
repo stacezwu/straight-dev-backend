@@ -46,7 +46,7 @@ func fromStringToInstTypeNoReg(str string) (*instTypeNoReg, error) {
 	}
 	i.operation = op
 
-	t, err := strconv.ParseInt(ss[1], 10, 52)
+	t, err := strconv.ParseInt(ss[1], 10, 20)
 	if err != nil {
 		return nil, fmt.Errorf("failed to ParseUint '%s' in %s: %s", ss[1], str, err)
 	}
