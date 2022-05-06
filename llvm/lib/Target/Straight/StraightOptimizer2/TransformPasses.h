@@ -4,6 +4,10 @@
 #include "StraightOptimizer2/Optimizer2.h"
 
 namespace Optimizer2 {
+
+	// ====== distanceLimit ======
+	static constexpr int MaxDistance = 8388607; //2**23 - 1
+
 	struct TransformPasses {
 		static void eliminateIMPLICIT_DEF( const Function& function );
 		static void eliminateCOPY( const Function& function );

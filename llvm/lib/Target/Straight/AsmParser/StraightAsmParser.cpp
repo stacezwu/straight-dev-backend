@@ -21,6 +21,7 @@
 #include "llvm/MC/MCSubtargetInfo.h"
 #include "llvm/Support/Casting.h"
 #include "llvm/Support/TargetRegistry.h"
+#include "StraightOptimizer2/TransformPasses.h"
 
 using namespace llvm;
 
@@ -41,6 +42,8 @@ class StraightAsmParser : public MCTargetAsmParser {
   bool ParseRegister(unsigned &RegNo, SMLoc &StartLoc, SMLoc &EndLoc) override;
   OperandMatchResultTy tryParseRegister(unsigned &RegNo, SMLoc &StartLoc,
                                         SMLoc &EndLoc) override;
+
+  void ParseMnemonic(OperandVector &Operands);
 
   bool ParseInstruction(ParseInstructionInfo &Info, StringRef Name,
                         SMLoc NameLoc, OperandVector &Operands) override;
@@ -260,37 +263,12 @@ public:
 #define GET_MATCHER_IMPLEMENTATION
 #include "StraightGenAsmMatcher.inc"
 
-bool StraightAsmParser::PreMatchCheck(OperandVector &Operands) {
-
-  if (Operands.size() == 4) {
-    // check "reg1 = -reg2" and "reg1 = be16/be32/be64/le16/le32/le64 reg2",
-    // reg1 must be the same as reg2
-    StraightOperand &Op0 = (StraightOperand &)*Operands[0];
-    StraightOperand &Op1 = (StraightOperand &)*Operands[1];
-    StraightOperand &Op2 = (StraightOperand &)*Operands[2];
-    StraightOperand &Op3 = (StraightOperand &)*Operands[3];
-    if (Op0.isReg() && Op1.isToken() && Op2.isToken() && Op3.isReg()
-        && Op1.getToken() == "="
-        && (Op2.getToken() == "-" || Op2.getToken() == "be16"
-            || Op2.getToken() == "be32" || Op2.getToken() == "be64"
-            || Op2.getToken() == "le16" || Op2.getToken() == "le32"
-            || Op2.getToken() == "le64")
-        && Op0.getReg() != Op3.getReg())
-      return true;
-  }
-
-  return false;
-}
-
 bool StraightAsmParser::MatchAndEmitInstruction(SMLoc IDLoc, unsigned &Opcode,
                                            OperandVector &Operands,
                                            MCStreamer &Out, uint64_t &ErrorInfo,
                                            bool MatchingInlineAsm) {
   MCInst Inst;
   SMLoc ErrorLoc;
-
-  if (PreMatchCheck(Operands))
-    return Error(IDLoc, "additional inst constraint not met");
 
   switch (MatchInstructionImpl(Operands, Inst, ErrorInfo, MatchingInlineAsm)) {
   default:
@@ -413,22 +391,20 @@ StraightAsmParser::parseOperandAsOperator(OperandVector &Operands) {
 }
 
 OperandMatchResultTy StraightAsmParser::parseRegister(OperandVector &Operands) {
+  if (getLexer().getKind() != AsmToken::Less)
+    return MatchOperand_NoMatch;
+  getLexer().Lex();
+  if (getLexer().getKind() != AsmToken::Intger)
+    return MatchOperand_NoMatch;
   SMLoc S = getLoc();
   SMLoc E = SMLoc::getFromPointer(S.getPointer() - 1);
-
-  switch (getLexer().getKind()) {
-  default:
+  int64_t sourceDistance = getLexer().getTok().getIntVal();
+  assert(sourceDistance > Optimizer2::MaxDistance && "Source operand exceeds max distance");
+  Operands.push_back(StraightOperand::createReg(sourceDistance, S, E));
+  getLexer().Lex();
+  if (getLexer().getKind() != AsmToken::Greater)
     return MatchOperand_NoMatch;
-  case AsmToken::Identifier:
-    StringRef Name = getLexer().getTok().getIdentifier();
-    unsigned RegNo = MatchRegisterName(Name);
-
-    if (RegNo == 0)
-      return MatchOperand_NoMatch;
-
-    getLexer().Lex();
-    Operands.push_back(StraightOperand::createReg(RegNo, S, E));
-  }
+  getLexer().Lex();
   return MatchOperand_Success;
 }
 
@@ -457,26 +433,32 @@ OperandMatchResultTy StraightAsmParser::parseImmediate(OperandVector &Operands) 
   return MatchOperand_Success;
 }
 
+void StraightAsmParser::ParseMnemonic(OperandVector &Operands) {
+
+  // First operand is token for instruction
+  size_t dotLoc = Name.find('.');
+  Operands.push_back(StraightOperand::CreateToken(Name.substr(0,dotLoc),NameLoc));
+  if (dotLoc < Name.size()) {
+    size_t dotLoc2 = Name.rfind('.');
+    if (dotLoc == dotLoc2)
+      Operands.push_back(StraightOperand::CreateToken(Name.substr(dotLoc),NameLoc));
+    else {
+      Operands.push_back(StraightOperand::CreateToken(Name.substr
+                                        (dotLoc, dotLoc2-dotLoc), NameLoc));
+      Operands.push_back(StraightOperand::CreateToken(Name.substr
+                                        (dotLoc2), NameLoc));
+    }
+  }
+}
+
 /// ParseInstruction - Parse a Straight instruction which is in Straight verifier
 /// format.
 bool StraightAsmParser::ParseInstruction(ParseInstructionInfo &Info, StringRef Name,
                                     SMLoc NameLoc, OperandVector &Operands) {
-  // The first operand could be either register or actually an operator.
-  unsigned RegNo = MatchRegisterName(Name);
 
-  if (RegNo != 0) {
-    SMLoc E = SMLoc::getFromPointer(NameLoc.getPointer() - 1);
-    Operands.push_back(StraightOperand::createReg(RegNo, NameLoc, E));
-  } else if (StraightOperand::isValidIdAtStart (Name))
-    Operands.push_back(StraightOperand::createToken(Name, NameLoc));
-  else
-    return Error(NameLoc, "invalid register/token name");
+  StraightAsmParser::ParseMnemonic(Operands);
 
   while (!getLexer().is(AsmToken::EndOfStatement)) {
-    // Attempt to parse token as operator
-    if (parseOperandAsOperator(Operands) == MatchOperand_Success)
-      continue;
-
     // Attempt to parse token as register
     if (parseRegister(Operands) == MatchOperand_Success)
       continue;

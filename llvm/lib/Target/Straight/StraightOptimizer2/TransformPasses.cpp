@@ -54,8 +54,6 @@ namespace Optimizer2 {
 		}
 	}
 
-	// ====== distanceLimit ======
-	static constexpr int MaxDistance = 8388607; //2**23 - 1
 
 	exempt_ptr<RegOperand> TransformPasses::findLongDistanceOperand( const Function& function ) {
 		for( const auto basic_block : function.getBasicBlocks() ) {
