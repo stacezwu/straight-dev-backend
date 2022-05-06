@@ -6,7 +6,7 @@
 namespace Optimizer2 {
 
 	// ====== distanceLimit ======
-	static constexpr int MaxDistance = 8388607; //2**23 - 1
+	extern uint64_t MaxDistance = 8388607; //2**23 - 1
 
 	struct TransformPasses {
 		static void eliminateIMPLICIT_DEF( const Function& function );

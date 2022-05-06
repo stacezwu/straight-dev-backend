@@ -129,7 +129,7 @@ namespace Optimizer2 {
 		const std::set<exempt_ptr<RegOperand>>& getUsers() const { return users; }
 
 		int RPIncNum() const;
-		int getPhiDistance() const;
+		uint64_t getPhiDistance() const;
 		bool isCOPY() const { return opcode == StraightIROpcode::COPY || opcode == StraightIROpcode::BITCASTftoi || opcode == StraightIROpcode::BITCASTitof || opcode == StraightIROpcode::BITCASTdtoi || opcode == StraightIROpcode::BITCASTitod; }
 		bool isRMOV() const { return opcode == StraightIROpcode::RMOV; }
 		bool isPhi() const { return opcode == StraightIROpcode::PHI; }
@@ -172,8 +172,8 @@ namespace Optimizer2 {
 		const std::vector<exempt_ptr<BasicBlock>>& getTransitBasicBlocks() const { return transitBasicBlocks; }
 		exempt_ptr<BasicBlock> getPhiIncomingBB() const { assert( getConsumer()->isPhi() && transitBasicBlocks.size() > 1 ); return getTransitBasicBlocks()[1]; }
 
-		int getDistance() const;
-		int getDistanceThroughPhi() const;
+		uint64_t getDistance() const;
+		uint64_t getDistanceThroughPhi() const;
 		bool isZeroReg() const { return producer == ZeroRegIns; }
 	};
 

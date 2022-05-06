@@ -59,19 +59,19 @@ namespace Optimizer2 {
 		} else if( opcode == StraightIROpcode::IMPLICIT_DEF ) {
 			return 0;
 		} else if( opcode == StraightIROpcode::Global ) {
-			return 2; // LUi + ADDiに変換されるため
+			return 2; 
 		} else {
 			return 1;
 		}
 	}
 
-	int Instruction::getPhiDistance() const {
+	uint64_t Instruction::getPhiDistance() const {
 		assert( isPhi() );
 		return regOperands[0]->getDistanceThroughPhi();
 	}
 
 
-	int RegOperand::getDistance() const {
+	uint64_t RegOperand::getDistance() const {
 		assert( !transitBasicBlocks.empty() );
 		if( isZeroReg() ) {
 			return 0;
@@ -80,7 +80,7 @@ namespace Optimizer2 {
 		if( transitBasicBlocks.size() == 1 ) {
 			return transitBasicBlocks[0]->countRP( producer, consumer );
 		} else {
-			int distance = transitBasicBlocks[0]->countRP( consumer );
+			uint64_t distance = transitBasicBlocks[0]->countRP( consumer );
 			for( std::size_t i = 1; i < transitBasicBlocks.size() - 1; ++i ) {
 				distance += transitBasicBlocks[i]->countRP( transitBasicBlocks[i-1] );
 			}
@@ -88,7 +88,7 @@ namespace Optimizer2 {
 		}
 	}
 
-	int RegOperand::getDistanceThroughPhi() const {
+	uint64_t RegOperand::getDistanceThroughPhi() const {
 		if( producer->isPhi() ) {
             return producer->getPhiDistance() + getDistance();
 		} else {
@@ -102,7 +102,7 @@ namespace Optimizer2 {
 		const exempt_ptr<BasicBlock> first = consumer->parent;
 		const exempt_ptr<BasicBlock> last = producer->parent;
 
-		// PHI命令の場合は、最初の一回に限りBasicBlockを遡るときに候補が複数ある
+		
 		bool phi_first_branch = static_cast<bool>(phi_target_bb);
 		for( exempt_ptr<BasicBlock> transit_bb = first; phi_first_branch || transit_bb != last; ) {
 			transitBasicBlocks.push_back( transit_bb );
@@ -110,8 +110,8 @@ namespace Optimizer2 {
 				phi_first_branch = false;
 				transit_bb = phi_target_bb;
 			} else {
-				// 一本道で持って来ることを要求
-				// この制約は 生存解析を行うAddPhiPassを通していれば満たされるはず
+				
+				
 				transit_bb = transit_bb->getOnlyOnePredBlock();
 			}
 		}
@@ -120,7 +120,7 @@ namespace Optimizer2 {
 
 	RegOperand::RegOperand( RegOperand::_zeroReg_tag_t, exempt_ptr<Instruction> consumer )
 		: producer( RegOperand::ZeroRegIns ), consumer( consumer ), transitBasicBlocks { consumer->parent } {
-		// do nothing
+		
 	}
 
 	std::unique_ptr<Instruction> Instruction::createNOP( exempt_ptr<BasicBlock> create_bb, int svreg_hint ) {
@@ -151,7 +151,7 @@ namespace Optimizer2 {
 	}
 
 	void RegOperand::pop_consumerBasicBlock() {
-		transitBasicBlocks.erase( transitBasicBlocks.begin() ); // [pop_front]
+		transitBasicBlocks.erase( transitBasicBlocks.begin() ); 
 		assert( !transitBasicBlocks.empty() );
 	}
 	void RegOperand::push_producerBasicBlock( exempt_ptr<BasicBlock> bb ) {
