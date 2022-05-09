@@ -26,7 +26,7 @@
 
 using namespace llvm;
 
-#define DEBUG_TYPE "bpf-disassembler"
+#define DEBUG_TYPE "straight-disassembler"
 
 typedef MCDisassembler::DecodeStatus DecodeStatus;
 
@@ -67,47 +67,50 @@ static const unsigned GPRDecoderTable[] = {
 static DecodeStatus DecodeGPRRegisterClass(MCInst &Inst, unsigned RegNo,
                                            uint64_t /*Address*/,
                                            const void * /*Decoder*/) {
-  if (RegNo > 11)
-    return MCDisassembler::Fail;
+  // if (RegNo > 11)
+  //   return MCDisassembler::Fail;
 
-  unsigned Reg = GPRDecoderTable[RegNo];
-  Inst.addOperand(MCOperand::createReg(Reg));
-  return MCDisassembler::Success;
+  // unsigned Reg = GPRDecoderTable[RegNo];
+  // Inst.addOperand(MCOperand::createReg(Reg));
+  // return MCDisassembler::Success;
+  return MCDisassembler::Fail;
 }
 
 static DecodeStatus decodeMemoryOpValue(MCInst &Inst, unsigned Insn,
                                         uint64_t Address, const void *Decoder) {
-  unsigned Register = (Insn >> 16) & 0xf;
-  Inst.addOperand(MCOperand::createReg(GPRDecoderTable[Register]));
-  unsigned Offset = (Insn & 0xffff);
-  Inst.addOperand(MCOperand::createImm(SignExtend32<16>(Offset)));
+  // unsigned Register = (Insn >> 16) & 0xf;
+  // Inst.addOperand(MCOperand::createReg(GPRDecoderTable[Register]));
+  // unsigned Offset = (Insn & 0xffff);
+  // Inst.addOperand(MCOperand::createImm(SignExtend32<16>(Offset)));
 
-  return MCDisassembler::Success;
+  // return MCDisassembler::Success;
+  return MCDisassembler::Fail;
 }
 
 #include "StraightGenDisassemblerTables.inc"
 static DecodeStatus readInstruction64(ArrayRef<uint8_t> Bytes, uint64_t Address,
                                       uint64_t &Size, uint64_t &Insn,
                                       bool IsLittleEndian) {
-  uint64_t Lo, Hi;
+  // uint64_t Lo, Hi;
 
-  if (Bytes.size() < 8) {
-    Size = 0;
-    return MCDisassembler::Fail;
-  }
+  // if (Bytes.size() < 8) {
+  //   Size = 0;
+  //   return MCDisassembler::Fail;
+  // }
 
-  Size = 8;
-  if (IsLittleEndian) {
-    Hi = (Bytes[0] << 24) | (Bytes[1] << 16) | (Bytes[2] << 0) | (Bytes[3] << 8);
-    Lo = (Bytes[4] << 0) | (Bytes[5] << 8) | (Bytes[6] << 16) | (Bytes[7] << 24);
-  } else {
-    Hi = (Bytes[0] << 24) | ((Bytes[1] & 0x0F) << 20) | ((Bytes[1] & 0xF0) << 12) |
-         (Bytes[2] << 8) | (Bytes[3] << 0);
-    Lo = (Bytes[4] << 24) | (Bytes[5] << 16) | (Bytes[6] << 8) | (Bytes[7] << 0);
-  }
-  Insn = Make_64(Hi, Lo);
+  // Size = 8;
+  // if (IsLittleEndian) {
+  //   Hi = (Bytes[0] << 24) | (Bytes[1] << 16) | (Bytes[2] << 0) | (Bytes[3] << 8);
+  //   Lo = (Bytes[4] << 0) | (Bytes[5] << 8) | (Bytes[6] << 16) | (Bytes[7] << 24);
+  // } else {
+  //   Hi = (Bytes[0] << 24) | ((Bytes[1] & 0x0F) << 20) | ((Bytes[1] & 0xF0) << 12) |
+  //        (Bytes[2] << 8) | (Bytes[3] << 0);
+  //   Lo = (Bytes[4] << 24) | (Bytes[5] << 16) | (Bytes[6] << 8) | (Bytes[7] << 0);
+  // }
+  // Insn = Make_64(Hi, Lo);
 
-  return MCDisassembler::Success;
+  //return MCDisassembler::Success;
+  return MCDisassembler::Fail;
 }
 
 DecodeStatus StraightDisassembler::getInstruction(MCInst &Instr, uint64_t &Size,
@@ -115,18 +118,19 @@ DecodeStatus StraightDisassembler::getInstruction(MCInst &Instr, uint64_t &Size,
                                              uint64_t Address,
                                              raw_ostream &VStream,
                                              raw_ostream &CStream) const {
-  bool IsLittleEndian = getContext().getAsmInfo()->isLittleEndian();
-  uint64_t Insn, Hi;
-  DecodeStatus Result;
+  // bool IsLittleEndian = getContext().getAsmInfo()->isLittleEndian();
+  // uint64_t Insn, Hi;
+  // DecodeStatus Result;
 
-  Result = readInstruction64(Bytes, Address, Size, Insn, IsLittleEndian);
-  if (Result == MCDisassembler::Fail) return MCDisassembler::Fail;
+  // Result = readInstruction64(Bytes, Address, Size, Insn, IsLittleEndian);
+  // if (Result == MCDisassembler::Fail) return MCDisassembler::Fail;
 
 
-  switch (Instr.getOpcode()) {
-  }
+  // switch (Instr.getOpcode()) {
+  // }
 
-  return Result;
+  // return Result;
+  return MCDisassembler::Fail;
 }
 
 typedef DecodeStatus (*DecodeFunc)(MCInst &MI, unsigned insn, uint64_t Address,

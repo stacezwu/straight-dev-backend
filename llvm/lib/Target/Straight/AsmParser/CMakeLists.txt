@@ -1,4 +1,4 @@
-add_llvm_component_library(LLVMBPFAsmParser
+add_llvm_component_library(LLVMStraightAsmParser
   StraightAsmParser.cpp
 
   LINK_COMPONENTS

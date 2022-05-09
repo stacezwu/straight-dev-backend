@@ -19,7 +19,7 @@ RUN mkdir /work/ && cd /work/ && wget https://github.com/llvm/llvm-project/relea
 COPY . /work/
 
 # Build llc and onikiri
-RUN cd /work/ && mkdir ninja && cd ninja && cmake -G Ninja -DCMAKE_CXX_STANDARD=17 ../llvm && ninja llc
+RUN cd /work/ && mkdir ninja && cd ninja && cmake -G Ninja -DCMAKE_CXX_STANDARD=17 ../llvm && ninja llc llvm-mc
 RUN cd /work/onikiri2/project/gcc/ && make -j$(nproc)
 
 # Run tests

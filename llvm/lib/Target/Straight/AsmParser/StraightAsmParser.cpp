@@ -7,7 +7,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "MCTargetDesc/StraightMCTargetDesc.h"
-#include "TargetInfo/StraightTargetInfo.h"
+#include "TargetInfo/StraightTargetInfo.cpp"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/StringSwitch.h"
 #include "llvm/MC/MCContext.h"
@@ -43,7 +43,7 @@ class StraightAsmParser : public MCTargetAsmParser {
   OperandMatchResultTy tryParseRegister(unsigned &RegNo, SMLoc &StartLoc,
                                         SMLoc &EndLoc) override;
 
-  void ParseMnemonic(OperandVector &Operands);
+void ParseMnemonic(StringRef Name, SMLoc NameLoc, OperandVector &Operands);
 
   bool ParseInstruction(ParseInstructionInfo &Info, StringRef Name,
                         SMLoc NameLoc, OperandVector &Operands) override;
@@ -394,12 +394,12 @@ OperandMatchResultTy StraightAsmParser::parseRegister(OperandVector &Operands) {
   if (getLexer().getKind() != AsmToken::Less)
     return MatchOperand_NoMatch;
   getLexer().Lex();
-  if (getLexer().getKind() != AsmToken::Intger)
+  if (getLexer().getKind() != AsmToken::Integer)
     return MatchOperand_NoMatch;
   SMLoc S = getLoc();
   SMLoc E = SMLoc::getFromPointer(S.getPointer() - 1);
-  int64_t sourceDistance = getLexer().getTok().getIntVal();
-  assert(sourceDistance > Optimizer2::MaxDistance && "Source operand exceeds max distance");
+  uint64_t sourceDistance = (uint64_t)getLexer().getTok().getIntVal();
+  assert(sourceDistance <= Optimizer2::getMaxDistance() && "Source operand exceeds max distance");
   Operands.push_back(StraightOperand::createReg(sourceDistance, S, E));
   getLexer().Lex();
   if (getLexer().getKind() != AsmToken::Greater)
@@ -433,19 +433,19 @@ OperandMatchResultTy StraightAsmParser::parseImmediate(OperandVector &Operands) 
   return MatchOperand_Success;
 }
 
-void StraightAsmParser::ParseMnemonic(OperandVector &Operands) {
+void StraightAsmParser::ParseMnemonic(StringRef Name, SMLoc NameLoc, OperandVector &Operands) {
 
   // First operand is token for instruction
   size_t dotLoc = Name.find('.');
-  Operands.push_back(StraightOperand::CreateToken(Name.substr(0,dotLoc),NameLoc));
+  Operands.push_back(StraightOperand::createToken(Name.substr(0,dotLoc),NameLoc));
   if (dotLoc < Name.size()) {
     size_t dotLoc2 = Name.rfind('.');
     if (dotLoc == dotLoc2)
-      Operands.push_back(StraightOperand::CreateToken(Name.substr(dotLoc),NameLoc));
+      Operands.push_back(StraightOperand::createToken(Name.substr(dotLoc),NameLoc));
     else {
-      Operands.push_back(StraightOperand::CreateToken(Name.substr
+      Operands.push_back(StraightOperand::createToken(Name.substr
                                         (dotLoc, dotLoc2-dotLoc), NameLoc));
-      Operands.push_back(StraightOperand::CreateToken(Name.substr
+      Operands.push_back(StraightOperand::createToken(Name.substr
                                         (dotLoc2), NameLoc));
     }
   }
@@ -456,7 +456,7 @@ void StraightAsmParser::ParseMnemonic(OperandVector &Operands) {
 bool StraightAsmParser::ParseInstruction(ParseInstructionInfo &Info, StringRef Name,
                                     SMLoc NameLoc, OperandVector &Operands) {
 
-  StraightAsmParser::ParseMnemonic(Operands);
+  StraightAsmParser::ParseMnemonic(Name, NameLoc, Operands);
 
   while (!getLexer().is(AsmToken::EndOfStatement)) {
     // Attempt to parse token as register
@@ -487,6 +487,4 @@ bool StraightAsmParser::ParseDirective(AsmToken DirectiveID) { return true; }
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeStraightAsmParser() {
   RegisterMCAsmParser<StraightAsmParser> X(getTheStraightTarget());
-  RegisterMCAsmParser<StraightAsmParser> Y(getTheStraightleTarget());
-  RegisterMCAsmParser<StraightAsmParser> Z(getTheStraightbeTarget());
 }

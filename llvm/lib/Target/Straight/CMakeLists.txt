@@ -14,7 +14,7 @@ set(LLVM_TARGET_DEFINITIONS Straight.td)
 
 tablegen(LLVM StraightGenRegisterInfo.inc -gen-register-info)
 tablegen(LLVM StraightGenInstrInfo.inc -gen-instr-info)
-tablegen(LLVM StraightGenDisassemblerTables.inc -gen-disassembler)
+#tablegen(LLVM StraightGenDisassemblerTables.inc -gen-disassembler)
 tablegen(LLVM StraightGenAsmWriter.inc -gen-asm-writer)
 tablegen(LLVM StraightGenAsmMatcher.inc -gen-asm-matcher)
 tablegen(LLVM StraightGenDAGISel.inc -gen-dag-isel)
@@ -64,7 +64,7 @@ add_llvm_target(StraightCodeGen
   Straight
   )
 
-add_subdirectory(Disassembler)
+#add_subdirectory(Disassembler)
 add_subdirectory(InstPrinter)
 add_subdirectory(TargetInfo)
 add_subdirectory(MCTargetDesc)

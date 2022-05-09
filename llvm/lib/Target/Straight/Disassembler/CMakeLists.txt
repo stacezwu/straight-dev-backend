@@ -1,12 +1,11 @@
-add_llvm_component_library(LLVMStraightDisassembler
-  StraightDisassembler.cpp
+# add_llvm_component_library(LLVMStraightDisassembler
+#   StraightDisassembler.cpp
 
-  LINK_COMPONENTS
-  MCDisassembler
-  StraightInfo
-  Support
+#   LINK_COMPONENTS
+#   MCDisassembler
+#   StraightInfo
+#   Support
 
-  ADD_TO_COMPONENT
-  Straight
-)
-
+#   ADD_TO_COMPONENT
+#   Straight
+# )

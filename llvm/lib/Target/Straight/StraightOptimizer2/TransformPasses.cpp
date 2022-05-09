@@ -60,7 +60,7 @@ namespace Optimizer2 {
 			for( const auto instruction : basic_block->getInstructions() ) {
 				if( instruction->isPhi() ) { continue; }
 				for( const auto operand : instruction->getRegOperands() ) {
-					if( operand->getDistanceThroughPhi() > MaxDistance ) {
+					if( operand->getDistanceThroughPhi() > getMaxDistance() ) {
 						return operand;
 					}
 				}
@@ -81,19 +81,19 @@ namespace Optimizer2 {
 
 	exempt_ptr<Instruction> TransformPasses::findLongDistanceLimitRMOV( exempt_ptr<BasicBlock> bb ) {
 		return bb->getInstructions().find_if( []( const auto &instr ) {
-			return instr->isLimitRMOV() && instr->getOnlyOneRegOperand()->getDistanceThroughPhi() > MaxDistance;
+			return instr->isLimitRMOV() && instr->getOnlyOneRegOperand()->getDistanceThroughPhi() > getMaxDistance();
 		} );
 	}
 
 	void TransformPasses::changeOperandToLimitRMOV( exempt_ptr<RegOperand> operand ) {
 		const auto rmov = findNearestRelayRMOV( operand );
-		if( rmov && rmov->getOnlyOneRegOperand()->getDistanceThroughPhi() <= MaxDistance ) {
+		if( rmov && rmov->getOnlyOneRegOperand()->getDistanceThroughPhi() <= getMaxDistance() ) {
 			Transformer::changeOperandToRelayRMOV( rmov, operand );
 		} else {
 			const auto insert_pos = InstructionIterator( operand->getConsumer() ).getFixedRegionTop();
 			const auto rmov = Transformer::insertRelayRMOVBefore( insert_pos, operand, 'L' ).getIns();
 			Transformer::changeOperandToRelayRMOV( rmov, operand );
-			if( operand->getDistanceThroughPhi() > MaxDistance ) {
+			if( operand->getDistanceThroughPhi() > getMaxDistance() ) {
 				assert( !"too large FixedRegion!" );
 			}
 		}
@@ -107,7 +107,7 @@ namespace Optimizer2 {
 			for( const auto basic_block : function.getBasicBlocks() ) {
 				while( const auto rmov = findLongDistanceLimitRMOV( basic_block ) ) {
 					const auto operand =rmov->getOnlyOneRegOperand();
-					while( operand->getDistanceThroughPhi() > MaxDistance ) {
+					while( operand->getDistanceThroughPhi() > getMaxDistance() ) {
 						if( const auto limit_rmov = findNearestRelayRMOV( operand ) ) {
 							Transformer::changeOperandToRelayRMOV( limit_rmov, operand );
 						} else {

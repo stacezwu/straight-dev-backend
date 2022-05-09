@@ -6,7 +6,10 @@
 namespace Optimizer2 {
 
 	// ====== distanceLimit ======
-	extern uint64_t MaxDistance = 8388607; //2**23 - 1
+	uint64_t getMaxDistance()	{
+		static const uint64_t MaxDistance = 8388607; //2**23 - 1
+		return MaxDistance;
+	}
 
 	struct TransformPasses {
 		static void eliminateIMPLICIT_DEF( const Function& function );
