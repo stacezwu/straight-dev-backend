@@ -12,8 +12,6 @@ type instruction interface {
 
 func instToBytes(inst instruction) [8]byte {
 	word := inst.toUInt64()
-	fmt.Printf("%x \n", word)
-	// println(word)
 	bs := [8]byte{}
 	for i := 0; i < 8; i++ {
 		bs[i] = byte((word >> uint(8*i)) & 0xff)

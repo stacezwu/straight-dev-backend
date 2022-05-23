@@ -6,7 +6,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"fmt"
 )
 
 const dataStartAddr = 0x10000
@@ -49,7 +48,6 @@ func strToInst(s string) (instruction, error) {
 		return instruction(i), err
 	}
 
-	println(s, ss[0])
 	panic("unimplemented yet")
 }
 
@@ -96,11 +94,8 @@ func assemble(fileName, outputFileName string) error {
 	prog := make([]byte, len(insts)*8)
 	for i, v := range insts {
 		t := instToBytes(v)
-		// println(string(t[:]))
-		// print(string(t[:]))
 		copy(prog[8*i:8*(i+1)], t[:])
 	}
-	// println(prog[:])
 	datumbytes := make([]byte, len(datum)+dataStartAddr)
 	for i, v := range datum {
 		datumbytes[i+dataStartAddr] = v
@@ -114,7 +109,6 @@ func assemble(fileName, outputFileName string) error {
 		ProgFileSize: uint64(len(insts) * 8),
 		Prog:         prog,
 	}
-	fmt.Printf("ProgramEntryAddr: %x \n",ProgEntryAddr)
 	elf.AddSegment(&progHeader)
 
 	stackHeader := ElfProgHeader{
