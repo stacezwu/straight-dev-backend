@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"os"
+	"fmt"
 )
 
 // ElfAddr : 64bit address
@@ -269,6 +270,7 @@ func (elf *ElfFile) WriteELFFile(fileName string) error {
 func (eh *ElfHeader) WriteELFHeader(fp *os.File, bo binary.ByteOrder) error {
 	var ehb bytes.Buffer
 	binary.Write(&ehb, bo, eh)
+	fmt.Printf("% x", ehb.Bytes())
 	_, err := fp.Write(ehb.Bytes())
 	return err
 }
